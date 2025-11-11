@@ -2,7 +2,7 @@ import streamlit as st
 from openai import OpenAI
 
 st.set_page_config(page_title="Creative Role Chatbot", page_icon="🎨")
-st.title("🎭 Creative Role-Based Chatbot")
+st.title("Role-Based Chatbot: Roles in Art Field")
 
 # --- STEP 1: API key input ---
 api_key = st.text_input("Enter your OpenAI API Key", type="password")

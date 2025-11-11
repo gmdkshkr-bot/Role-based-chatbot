@@ -1,21 +1,18 @@
 import streamlit as st
 from openai import OpenAI
+import os
 import time
 
 st.set_page_config(page_title="Creative Role Chatbot", page_icon="🎨")
-st.title("🎭 Creative Role-Based Chatbot (User API Key)")
+st.title("🎭 Creative Role-Based Chatbot (All-Tier Safe)")
 
-# --- STEP 1: User enters their API key ---
-api_key = st.text_input(
-    "Enter your OpenAI API Key",
-    type="password",
-    help="Your key is only stored in session memory and never saved permanently."
-)
-if not api_key:
-    st.warning("Please enter your API key to begin.")
+# --- STEP 1: Load server-side OpenAI API key ---
+OPENAI_KEY = os.getenv("OPENAI_API_KEY")  # Set this in Streamlit Secrets
+if not OPENAI_KEY:
+    st.error("OpenAI API key is not set. Please set it in Streamlit secrets.")
     st.stop()
 
-client = OpenAI(api_key=api_key)
+client = OpenAI(api_key=OPENAI_KEY)
 
 # --- STEP 2: Define creative/art roles ---
 creative_roles = {
@@ -74,22 +71,21 @@ if user_input:
     st.session_state["messages"].append({"role": "user", "content": user_input})
     st.chat_message("user").write(user_input)
 
-    # --- STEP 7: Use cheaper model (gpt-3.5-turbo) for free-tier ---
+    # --- STEP 7: Use cheaper model to save free-tier quota ---
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo",  # cheaper & free-tier friendly
             messages=st.session_state["messages"],
             temperature=0.5,
-            max_tokens=400,
+            max_tokens=400,  # limit output to reduce usage
         )
 
         bot_reply = response.choices[0].message.content
-
         st.session_state["messages"].append({"role": "assistant", "content": bot_reply})
         st.chat_message("assistant").write(bot_reply)
     except Exception as e:
         st.error(f"Error calling OpenAI API: {e}")
 
-# --- STEP 8: Trim conversation memory intelligently ---
+# --- STEP 8: Trim conversation memory to save tokens ---
 # Keep system + last 6 messages
 st.session_state["messages"] = [st.session_state["messages"][0]] + st.session_state["messages"][-6:]

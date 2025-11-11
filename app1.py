@@ -44,7 +44,7 @@ if user_input:
         model="gpt-4o-mini",
         input=st.session_state["messages"],
         temperature=0.4,
-        max_output_tokens=500,
+        max_output_tokens=1000,
     )
 
     bot_reply = response.output[0].content[0].text
